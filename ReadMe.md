@@ -6,6 +6,16 @@ This project is a recommendation model website built using Flask and TensorFlow.
 
 To get started with the project, follow these steps:
 
+important step 
+run the command to get the difined model for recommendations
+
+```shell
+
+python product_recommendation_miniLM.py
+
+```
+the directory will have the pkl files.
+
 1. Create a new conda environment and install TensorFlow:
 
    ```shell
