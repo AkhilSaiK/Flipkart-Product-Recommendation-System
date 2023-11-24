@@ -14,6 +14,8 @@ run the command to get the difined model for recommendations
 python product_recommendation_miniLM.py
 
 ```
+Dataset Details :https://drive.google.com/file/d/1Et8ekpb16JkX8dti-v2L9wNgH0kMAe1C/view?usp=sharing
+
 the directory will have the pkl files.
 
 1. Create a new conda environment and install TensorFlow:
@@ -53,3 +55,5 @@ the directory will have the pkl files.
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+
+
