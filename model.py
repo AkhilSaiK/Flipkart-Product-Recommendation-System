@@ -1,29 +1,60 @@
+import os
+import pickle
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
-import pickle
+import torch
 
 # Set pandas display option
 pd.set_option('display.max_colwidth', None)
 
-# Load the dataset
-df = pd.read_csv('flipkartData.csv')
+# File paths for pickled data
+df_file = 'df.pkl'
+embeddings_file = 'embeddings.pkl'
+model_file = 'model.pkl'
 
-# Preprocessing
-df = df.dropna(subset=['description', 'product_name'])
-df['content'] = df['description'] + df['product_name']
+# Function to save data
+def save_data():
+    with open(df_file, 'wb') as f:
+        pickle.dump(df, f)
+    with open(embeddings_file, 'wb') as f:
+        pickle.dump(embeddings, f)
+    model.save(model_file)
 
-# Load model
-model = SentenceTransformer('all-MiniLM-L6-v2')
+# Function to load data
+def load_data():
+    global df, embeddings, model
+    with open(df_file, 'rb') as f:
+        df = pickle.load(f)
+    with open(embeddings_file, 'rb') as f:
+        embeddings = pickle.load(f)
+    model = SentenceTransformer(model_file)
 
-# Read embeddings and cosine similarity matrix from pickle files
-with open('embeddings.pkl', 'rb') as f:
-    embeddings = pickle.load(f)
+# Load the dataset and train the model if pickle files are not present
+if not os.path.exists(df_file) or not os.path.exists(embeddings_file) or not os.path.exists(model_file):
+    # Load the dataset
+    df = pd.read_csv('../reco/flipkartData.csv')
 
-with open('cosine_sim.pkl', 'rb') as f:
-    cosine_sim = pickle.load(f)
+    # Preprocessing
+    df = df.dropna(subset=['description', 'product_name'])
+    df['content'] = df['description'] + df['product_name']
 
-def get_recommendations(user_input, model=model, embeddings=embeddings, cosine_sim=cosine_sim, df=df):
+    # Use SentenceTransformer to generate embeddings
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+    # model = SentenceTransformer('bert-base-nli-mean-tokens')
+    embeddings = model.encode(df['content'].tolist(), convert_to_tensor=False)
+
+    # Save the data
+    save_data()
+else:
+    # Load the data
+    load_data()
+
+# Compute the cosine similarity matrix
+cosine_sim = cosine_similarity(embeddings)
+
+# Function to get the most similar products
+def get_recommendations(user_input, cosine_sim=cosine_sim):
     user_input_embedding = model.encode([user_input], convert_to_tensor=False)
     cosine_sim_input = cosine_similarity(user_input_embedding, embeddings)
     sim_scores = list(enumerate(cosine_sim_input[0]))
@@ -32,3 +63,6 @@ def get_recommendations(user_input, model=model, embeddings=embeddings, cosine_s
     product_indices = [i[0] for i in sim_scores]
     return df[['uniq_id', 'product_name', 'product_url']].iloc[product_indices]
 
+# Test the function
+print(get_recommendations('lingirie'))
+print(get_recommendations('saree'))

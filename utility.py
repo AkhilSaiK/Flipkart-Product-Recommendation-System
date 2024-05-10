@@ -3,7 +3,7 @@ import pymysql
 # Establishing a connection to the database
 def connect():
     try:
-        conn = pymysql.connect(host='localhost', user='root', password='Pandusai@2003', db='reccommendationmodel')
+        conn = pymysql.connect(host='localhost', user='root', password='19375', db='hobnob')
         return conn
     except:
         return False
